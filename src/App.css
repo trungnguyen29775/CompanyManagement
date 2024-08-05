@@ -1,38 +1,23 @@
+@font-face {
+    font-family: 'montserrat';
+    src: url('/public/font/static/Montserrat-Medium.ttf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+#root {
+    --main-color: #0d1e40;
+    --sub-color: #1a3873;
+    --sub-lighter-color: #2a4883;
+    --font-color: #6077a6;
+    --border-color: #b0c1d9;
+    --highlight-color: #80f2f2;
+    font-family: 'montserrat';
+}
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
