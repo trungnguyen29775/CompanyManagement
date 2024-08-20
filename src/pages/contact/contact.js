@@ -8,11 +8,32 @@ import { useEffect, useState } from 'react';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import Stack from '@mui/material/Stack';
+import Pagination from '@mui/material/Pagination';
 
 const Contact = () => {
     const [contactType, setContactType] = useState('Chuyên viên');
+    const [page, setPage] = useState(1);
+    const visibleNum = 5;
+    const [visibleData, setVisibleData] = useState([]);
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        setData(contactType === 'Chuyên Viên' ? [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] : [1, 1, 1, 1, 1, 1, 1]);
+    }, [contactType]);
+    useEffect(() => {
+        setVisibleData(data.slice(0, visibleNum));
+        setPage(1);
+    }, [data]);
+    useEffect(() => {
+        console.log(visibleData);
+    }, [visibleData]);
     const handleChangeContactType = (event) => {
         setContactType(event.target.value);
+    };
+    const handlePaginitionContact = (event, newPage) => {
+        setPage(newPage);
+        setVisibleData(data.slice((newPage - 1) * visibleNum, newPage * visibleNum + 1));
     };
     const members = [
         {
@@ -55,18 +76,25 @@ const Contact = () => {
                     renderInput={(params) => <TextField {...params} label="Tìm kiếm theo Tên" />}
                 />
             </Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    width: 'auto',
-                }}
-            >
-                {[1, 2, 3, 1, 1, 1].map((item, index) => (
+            <div className="contact-card-container">
+                {visibleData?.map((item, index) => (
                     <ContactCard key={index} />
                 ))}
-            </Box>
+            </div>
+            <Stack spacing={2} style={{ paddingBottom: '30px', margin: 'auto' }}>
+                <Pagination
+                    defaultPage={1}
+                    count={
+                        data?.length % visibleNum === 0
+                            ? Math.floor(data.length / visibleNum)
+                            : data.length < visibleNum
+                            ? 1
+                            : Math.floor(data.length / visibleNum) + 1
+                    }
+                    onChange={handlePaginitionContact}
+                    page={page}
+                />
+            </Stack>
         </div>
     );
 };

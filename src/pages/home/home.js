@@ -16,19 +16,24 @@ function Home() {
     const [projects, setProjects] = useState([]);
     const visibleNum = 8;
     const [projecType, setProjectType] = useState('Dự Án Giáo Dục');
-    const [visibleData, setVisibleData] = useState(visibleNum);
+    const [visibleData, setVisibleData] = useState(projects);
+    const [page, setPage] = useState(1);
     useEffect(() => {
         setProjects(projecType === 'Dự Án Giáo Dục' ? [1, 1, 2, 3, 4, 5, 6, 1, 1, 1, 1] : [1, 2]);
-        console.log(projects);
     }, [projecType]);
+    useEffect(() => {
+        setVisibleData(projects.slice(0, visibleNum));
+    }, [projects]);
+
     // Function
 
     const handleChangeProjectNav = (event) => {
         setProjectType(event.target.value);
     };
 
-    const handlePaginitionProject = (event) => {
-        console.log(event.target.value);
+    const handlePaginitionProject = (event, newPage) => {
+        setPage(newPage);
+        setVisibleData(projects.slice((newPage - 1) * visibleNum, newPage * visibleNum + 1));
     };
     return (
         <div className="content-container">
@@ -50,12 +55,23 @@ function Home() {
                         </FormControl>
                     </Box>
                     <div className="content-main">
-                        {projects.map((item, index) => {
+                        {visibleData?.map((item, index) => {
                             return <ProjectCard data={item} key={index} />;
                         })}
                     </div>
                     <Stack spacing={2} style={{ marginBottom: '30px' }}>
-                        <Pagination count={10} onClick={handlePaginitionProject} />
+                        <Pagination
+                            defaultPage={1}
+                            count={
+                                projects?.length % visibleNum === 0
+                                    ? Math.floor(projects.length / visibleNum)
+                                    : projects.length < visibleNum
+                                    ? 1
+                                    : Math.floor(projects.length / visibleNum) + 1
+                            }
+                            onChange={handlePaginitionProject}
+                            page={page}
+                        />
                     </Stack>
                 </div>
             ) : (
