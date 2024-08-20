@@ -1,0 +1,20 @@
+.main-layout-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.main-layout-wrapper::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
+
+.main-layout-wrapper {
+    scrollbar-width: none;
+}
+
+.main-layout-wrapper {
+    -ms-overflow-style: none;
+}

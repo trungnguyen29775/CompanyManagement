@@ -12,7 +12,6 @@ root.render(
         <StateProvider>
             <App />
         </StateProvider>
-        ,
     </BrowserRouter>,
 );
 

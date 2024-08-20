@@ -1,0 +1,10 @@
+.contact-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    margin-top: 70px;
+    flex-wrap: wrap;
+    padding: 10px;
+    overflow-y: auto;
+    align-items: center;
+}

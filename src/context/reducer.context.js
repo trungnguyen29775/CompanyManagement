@@ -2,7 +2,9 @@ import { GET_DATA_USER, LOGGED } from './constant.context';
 
 export const initState = {
     login: false,
-    userData: {},
+    userData: {
+        type: 'member',
+    },
 };
 
 export const reducer = (state, action) => {
