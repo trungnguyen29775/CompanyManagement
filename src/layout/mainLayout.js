@@ -9,6 +9,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Home from '../pages/home/home';
 import Contact from '../pages/contact/contact';
 import './mainLayout.css';
+import ProjectCard from '../components/projectCard';
+import ProjectDetail from '../pages/projectDetail/projectDetail';
 
 const MainLayout = () => {
     const [profileMenu, setProfileMenu] = useState(null);
@@ -83,7 +85,7 @@ const MainLayout = () => {
                     <MenuItem onClick={handleHideUserOption}>Logout</MenuItem>
                 </Menu>
             </div>
-            {navElement === 'Home' ? <Home /> : navElement === 'Contact' ? <Contact /> : ''}
+            {navElement === 'Home' ? <Home /> : navElement === 'Contact' ? <Contact /> : <ProjectDetail />}
         </div>
     );
 };

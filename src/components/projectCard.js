@@ -5,11 +5,22 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectCard = (data, key) => {
+    const navigate = useNavigate();
     return (
-        <Card sx={{ maxWidth: 345, margin: '15px ', marginRight: 0 }} key={key}>
-            <CardMedia sx={{ height: 140 }} image="/image/project_poster.jpg" title="green iguana" />
+        <Card
+            sx={{
+                maxWidth: 345,
+                margin: '15px ',
+                marginRight: 0,
+                transform: 'scale 2s ease',
+                ':hover': { cursor: 'pointer', scale: '1.01' },
+            }}
+            key={key}
+        >
+            <CardMedia sx={{ height: 140 }} image="/image/project_poster.jpg" title="Project poster" />
             <CardContent>
                 <Typography gutterBottom variant="h5" component="div">
                     Dự án A
