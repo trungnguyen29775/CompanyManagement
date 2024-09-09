@@ -1,27 +1,24 @@
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
-import './projectDetail.css';
-import { Avatar, Container, Slide, Stack } from '@mui/material';
-import { color } from '../../constant/style';
+import { Avatar, Slide, Stack } from '@mui/material';
+import { color } from '../constant/style';
 
 const ProjectDetail = () => {
     return (
-        <div className="project-detail-container">
+        <div>
             <Card
                 sx={{
-                    margin: 'auto',
-                    width: '90%',
+                    width: '80%',
                     minWidth: 300,
                     display: 'flex',
                     flexDirection: 'column',
                     flexWrap: 'wrap',
-                    marginTop: '30px',
+                    margin: 'auto',
+                    padding: '30px',
+                    marginTop: '30%',
                 }}
             >
                 <CardMedia sx={{ height: 500 }} image="/image/project_poster.jpg" title="Project poster" />

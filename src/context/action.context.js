@@ -1,4 +1,4 @@
-import { GET_DATA_USER, LOGGED } from './constant.context';
+import { GET_DATA_USER, LOGGED, LOGGOUT } from './constant.context';
 
 export const logged = () => {
     return {
@@ -10,5 +10,11 @@ export const getDataUser = (payload) => {
     return {
         type: GET_DATA_USER,
         payload,
+    };
+};
+
+export const loggout = () => {
+    return {
+        type: LOGGOUT,
     };
 };

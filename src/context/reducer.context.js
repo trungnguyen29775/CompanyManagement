@@ -1,4 +1,4 @@
-import { GET_DATA_USER, LOGGED } from './constant.context';
+import { GET_DATA_USER, LOGGED, LOGGOUT } from './constant.context';
 
 export const initState = {
     login: false,
@@ -20,6 +20,9 @@ export const reducer = (state, action) => {
                 ...state,
                 userData: action.payload,
             };
+        }
+        case LOGGOUT: {
+            return initState;
         }
         default: {
             console.log('Invalid Action');

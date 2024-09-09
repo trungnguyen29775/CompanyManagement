@@ -14,12 +14,14 @@ import Pagination from '@mui/material/Pagination';
 const Contact = () => {
     const [contactType, setContactType] = useState('Chuyên viên');
     const [page, setPage] = useState(1);
-    const visibleNum = 5;
+    const visibleNum = 8;
     const [visibleData, setVisibleData] = useState([]);
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        setData(contactType === 'Chuyên Viên' ? [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] : [1, 1, 1, 1, 1, 1, 1]);
+        setData(
+            contactType === 'Chuyên Viên' ? [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] : [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        );
     }, [contactType]);
     useEffect(() => {
         setVisibleData(data.slice(0, visibleNum));
@@ -33,7 +35,7 @@ const Contact = () => {
     };
     const handlePaginitionContact = (event, newPage) => {
         setPage(newPage);
-        setVisibleData(data.slice((newPage - 1) * visibleNum, newPage * visibleNum + 1));
+        setVisibleData(data.slice((newPage - 1) * visibleNum, newPage * visibleNum));
     };
     const members = [
         {

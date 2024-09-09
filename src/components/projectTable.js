@@ -25,6 +25,9 @@ import Avatar from '@mui/material/Avatar';
 import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Autocomplete, Button, Card, Input, TextField } from '@mui/material';
+import { InputOutlined } from '@mui/icons-material';
+import EditProjectForm from './editForm';
 function createData(stt, date, ten, maHopDong, mentor, role, status, progress) {
     return {
         stt,
@@ -37,6 +40,24 @@ function createData(stt, date, ten, maHopDong, mentor, role, status, progress) {
         progress,
     };
 }
+
+const projects = [
+    {
+        label: 'Nguyễn Trần Minh Trung',
+    },
+    {
+        label: 'Nguyễn Văn A',
+    },
+    {
+        label: 'Nguyễn Văn B',
+    },
+    {
+        label: 'Trần Văn C',
+    },
+    {
+        label: 'Dương Văn D',
+    },
+];
 
 const rows = [
     createData(1, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Minh Trung', 'Manager', 'pending', '60'),
@@ -195,36 +216,65 @@ function EnhancedTableToolbar(props) {
     return (
         <Toolbar
             sx={{
-                pl: { sm: 2 },
-                pr: { xs: 1, sm: 1 },
-                ...(numSelected > 0 && {
-                    bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                }),
+                boxSizing: 'border-box',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
             }}
         >
-            {numSelected > 0 ? (
-                <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1" component="div">
-                    {numSelected} selected
-                </Typography>
-            ) : (
-                <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-                    Dự án
-                </Typography>
-            )}
-
-            {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <DeleteIcon />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            )}
+            <Toolbar
+                sx={{
+                    pl: { sm: 2 },
+                    pr: { xs: 1, sm: 1 },
+                    ...(numSelected > 0 && {
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+                    }),
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    display: numSelected > 0 ? 'flex' : 'none',
+                    marginTop: '10px',
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
+                    {numSelected > 0 ? (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                width: '100%',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1" component="div">
+                                {numSelected} selected
+                            </Typography>
+                            <Tooltip title="Delete">
+                                <IconButton>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    ) : (
+                        ''
+                    )}
+                </Box>
+            </Toolbar>
+            <Box>
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '30px' }}>
+                    <Typography variant="h6" id="tableTitle" component="div">
+                        Thành Viên
+                    </Typography>
+                    <Autocomplete
+                        disablePortal
+                        id="combo-box-demo"
+                        options={projects}
+                        sx={{ width: 300, marginLeft: '20px' }}
+                        renderInput={(params) => <TextField {...params} label="Tìm kiếm theo Tên" />}
+                    />
+                </Box>
+            </Box>
         </Toolbar>
     );
 }
@@ -233,13 +283,23 @@ EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function ProjectTable() {
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [editMode, setEditMode] = React.useState(false);
+
+    const showEditMode = (e) => {
+        e.stopPropagation();
+        setEditMode(true);
+    };
+
+    const hideEditMode = () => {
+        setEditMode(false);
+    };
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -363,8 +423,12 @@ export default function EnhancedTable() {
                                             <LinearProgress variant="determinate" value={row.progress} />
                                         </TableCell>
                                         <TableCell align="left">
-                                            <EditIcon color="action"></EditIcon>
-                                            <MoreVertIcon color="action"></MoreVertIcon>
+                                            <Button onClick={showEditMode}>
+                                                <EditIcon color="action"></EditIcon>
+                                            </Button>
+                                            <Button>
+                                                <MoreVertIcon color="action"></MoreVertIcon>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -391,7 +455,44 @@ export default function EnhancedTable() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <FormControlLabel control={<Switch checked={dense} onChange={handleChangeDense} />} label="Dense padding" />
+            {editMode === true ? (
+                <div
+                    style={{
+                        display: 'flex',
+                        height: '100vh',
+                        width: '100vw',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        top: 0,
+                        bottom: 0,
+                        position: 'absolute',
+                        zIndex: 2,
+                        left: 0,
+                        right: 0,
+                    }}
+                >
+                    <Card
+                        sx={{
+                            height: '90%',
+                            width: '90%',
+                            margin: 'auto',
+                            boxSizing: 'border-box',
+                            padding: '20px',
+                            overflowY: 'auto',
+                            borderRadius: '10px',
+                            '&::-webkit-scrollbar': {
+                                display: 'none',
+                            },
+                            '-ms-overflow-style': 'none',
+                            'scrollbar-width': 'none',
+                        }}
+                    >
+                        <EditProjectForm />
+                    </Card>
+                </div>
+            ) : (
+                ''
+            )}
         </Box>
     );
 }

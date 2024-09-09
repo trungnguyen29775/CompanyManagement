@@ -10,13 +10,18 @@ import Home from '../pages/home/home';
 import Contact from '../pages/contact/contact';
 import './mainLayout.css';
 import ProjectCard from '../components/projectCard';
-import ProjectDetail from '../pages/projectDetail/projectDetail';
+import ProjectDetail from '../components/projectDetail';
+import { useNavigate } from 'react-router-dom';
+import StateContext from '../context/context.context';
+import { loggout } from '../context/action.context';
 
 const MainLayout = () => {
     const [profileMenu, setProfileMenu] = useState(null);
     const [value, setValue] = useState('Home');
     const [navElement, setNavElement] = useState('Home');
+    const [state, dispatchState] = useContext(StateContext);
     const openProfileMenu = Boolean(profileMenu);
+    const navigation = useNavigate();
 
     const handleShowUserOption = (event) => {
         setProfileMenu(event.currentTarget);
@@ -24,10 +29,15 @@ const MainLayout = () => {
     const handleHideUserOption = () => {
         setProfileMenu(null);
     };
+
+    const handleLoggout = () => {
+        dispatchState(loggout);
+    };
     const handleChangeNavHome = (newValue) => {
         setValue(newValue);
         setNavElement(newValue);
     };
+
     return (
         <div className="main-layout-wrapper">
             <div className="nav-bar-container">
@@ -80,12 +90,12 @@ const MainLayout = () => {
                         'aria-labelledby': 'profile-button',
                     }}
                 >
-                    <MenuItem onClick={handleHideUserOption}>Profile</MenuItem>
+                    <MenuItem onClick={() => navigation('/profile')}>Profile</MenuItem>
                     <MenuItem onClick={handleHideUserOption}>My account</MenuItem>
-                    <MenuItem onClick={handleHideUserOption}>Logout</MenuItem>
+                    <MenuItem onClick={handleLoggout}>Logout</MenuItem>
                 </Menu>
             </div>
-            {navElement === 'Home' ? <Home /> : navElement === 'Contact' ? <Contact /> : <ProjectDetail />}
+            {navElement === 'Home' ? <Home /> : navElement === 'Contact' ? <Contact /> : ''}
         </div>
     );
 };
