@@ -22,22 +22,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import Avatar from '@mui/material/Avatar';
-import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Autocomplete, Button, Card, Input, TextField } from '@mui/material';
 import { InputOutlined } from '@mui/icons-material';
 import EditProjectForm from './editForm';
-function createData(stt, date, ten, maHopDong, mentor, role, status, progress) {
+import StateContext from '../context/context.context';
+import { clearUpdate, showEditProject } from '../context/action.context';
+import AddNewProject from './addProject';
+function createData(id, startDate, projectName, contractCode, mentor, statusProject, salaryStatus, members) {
     return {
-        stt,
-        date,
-        ten,
-        maHopDong,
+        id,
+        startDate,
+        projectName,
+        contractCode,
         mentor,
-        role,
-        status,
-        progress,
+        statusProject,
+        salaryStatus,
+        members,
     };
 }
 
@@ -57,17 +59,6 @@ const projects = [
     {
         label: 'Dương Văn D',
     },
-];
-
-const rows = [
-    createData(1, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Minh Trung', 'Manager', 'pending', '60'),
-    createData(2, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Duyên Linh', 'Manager', 'pending', '70'),
-    createData(3, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Nước Mía', 'Manager', 'pending', '20'),
-    createData(4, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Cà Ri', 'Manager', 'pending', '10'),
-    createData(5, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Gỏi Cuốn', 'Manager', 'pending', '50'),
-    createData(6, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Trung', 'Manager', 'done', '100'),
-    createData(7, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Trung', 'Manager', 'pending', '45'),
-    createData(8, '23/07/2023', 'Software Project', '010/HDDT-DHCNSG', 'Trung', 'Manager', 'pending', '50'),
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -100,25 +91,25 @@ function stableSort(array, comparator) {
 
 const headCells = [
     {
-        id: 'stt',
+        id: 'id',
         numeric: true,
         disablePadding: true,
-        label: 'STT',
+        label: 'ID',
     },
     {
-        id: 'date',
+        id: 'startDate',
         numeric: false,
         disablePadding: false,
         label: 'Ngày',
     },
     {
-        id: 'ten',
+        id: 'projectName',
         numeric: false,
         disablePadding: false,
         label: 'Tên dự án',
     },
     {
-        id: 'maHopDong',
+        id: 'contractCode',
         numeric: false,
         disablePadding: false,
         label: 'Mã hợp đồng',
@@ -130,22 +121,23 @@ const headCells = [
         label: 'Người phụ trách chính',
     },
     {
-        id: 'role',
+        id: 'numMember',
         numeric: false,
         disablePadding: false,
-        label: 'Role',
+        label: 'Số lượng',
     },
+
     {
-        id: 'status',
+        id: 'statusProject',
         numeric: true,
         disablePadding: false,
         label: 'Tình trạng',
     },
     {
-        id: 'progress',
+        id: 'salaryStatus',
         numeric: true,
         disablePadding: false,
-        label: 'Tiến trình',
+        label: 'Tình trạng lương',
     },
     {
         id: 'action',
@@ -242,7 +234,7 @@ function EnhancedTableToolbar(props) {
                             sx={{
                                 display: 'flex',
                                 flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                justifyConnamet: 'space-between',
                                 width: '100%',
                                 alignItems: 'center',
                             }}
@@ -264,7 +256,7 @@ function EnhancedTableToolbar(props) {
             <Box>
                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '30px' }}>
                     <Typography variant="h6" id="tableTitle" component="div">
-                        Thành Viên
+                        Dự án
                     </Typography>
                     <Autocomplete
                         disablePortal
@@ -285,20 +277,181 @@ EnhancedTableToolbar.propTypes = {
 
 export default function ProjectTable() {
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('id');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [editMode, setEditMode] = React.useState(false);
 
-    const showEditMode = (e) => {
+    const [rows, setRows] = React.useState([
+        createData(
+            1,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },
+                { id: 2, name: 'Bob', avatar: '/image/avt.jpg' },
+                { id: 3, name: 'Charlie', avatar: '/image/avt.jpg' },
+                { id: 4, name: 'David', avatar: '/image/avt.jpg' },
+                { id: 5, name: 'Eva', avatar: '/image/avt.jpg' },
+                { id: 6, name: 'Frank', avatar: '/image/avt.jpg' },
+                { id: 7, name: 'Grace', avatar: '/image/avt.jpg' },
+                { id: 8, name: 'Hannah', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            2,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 9, name: 'Isaac', avatar: '/image/avt.jpg' },
+                { id: 10, name: 'Jack', avatar: '/image/avt.jpg' },
+                { id: 11, name: 'Katie', avatar: '/image/avt.jpg' },
+                { id: 12, name: 'Leo', avatar: '/image/avt.jpg' },
+                { id: 13, name: 'Mia', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            3,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 14, name: 'Nina', avatar: '/image/avt.jpg' },
+                { id: 15, name: 'Oscar', avatar: '/image/avt.jpg' },
+                { id: 16, name: 'Paul', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            4,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 17, name: 'Quinn', avatar: '/image/avt.jpg' },
+                { id: 18, name: 'Rachel', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            5,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 19, name: 'Sam', avatar: '/image/avt.jpg' },
+                { id: 20, name: 'Tina', avatar: '/image/avt.jpg' },
+                { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },
+                { id: 2, name: 'Bob', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            6,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'done',
+            'Đã thanh toán',
+            [
+                { id: 3, name: 'Charlie', avatar: '/image/avt.jpg' },
+                { id: 4, name: 'David', avatar: '/image/avt.jpg' },
+                { id: 5, name: 'Eva', avatar: '/image/avt.jpg' },
+                { id: 6, name: 'Frank', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            7,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 7, name: 'Grace', avatar: '/image/avt.jpg' },
+                { id: 8, name: 'Hannah', avatar: '/image/avt.jpg' },
+                { id: 9, name: 'Isaac', avatar: '/image/avt.jpg' },
+                { id: 10, name: 'Jack', avatar: '/image/avt.jpg' },
+                { id: 11, name: 'Katie', avatar: '/image/avt.jpg' },
+                { id: 12, name: 'Leo', avatar: '/image/avt.jpg' },
+                { id: 13, name: 'Mia', avatar: '/image/avt.jpg' },
+                { id: 14, name: 'Nina', avatar: '/image/avt.jpg' },
+                { id: 15, name: 'Oscar', avatar: '/image/avt.jpg' },
+                { id: 16, name: 'Paul', avatar: '/image/avt.jpg' },
+                { id: 17, name: 'Quinn', avatar: '/image/avt.jpg' },
+            ],
+        ),
+        createData(
+            8,
+            '2023-07-23',
+            'Software Project',
+            '010/HDDT-DHCNSG',
+            { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
+            'pending',
+            'Đã thanh toán',
+            [
+                { id: 18, name: 'Rachel', avatar: '/image/avt.jpg' },
+                { id: 19, name: 'Sam', avatar: '/image/avt.jpg' },
+                { id: 20, name: 'Tina', avatar: '/image/avt.jpg' },
+                { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },
+                { id: 2, name: 'Bob', avatar: '/image/avt.jpg' },
+                { id: 3, name: 'Charlie', avatar: '/image/avt.jpg' },
+            ],
+        ),
+    ]);
+    // Context
+    const [state, dispatchState] = React.useContext(StateContext);
+    const [hightlight, setHightight] = React.useState('');
+    React.useEffect(() => {
+        if (state.projectUpdated?.status === true) {
+            const index = rows.findIndex((item) => item.id === state.projectUpdated.data.id);
+            if (index !== -1) {
+                const temp = rows.slice(0, index).concat(rows.slice(index + 1, rows?.length));
+                temp.unshift(state.projectUpdated.data);
+                console.log(temp);
+                setRows(rows.slice(0, index).concat(rows.slice(index + 1, rows?.length)));
+                setHightight(state.projectUpdated.data.id);
+            }
+        }
+    }, [state]);
+
+    React.useEffect(() => {
+        if (hightlight != '') {
+            setInterval(() => {
+                setHightight('');
+            }, 3000);
+        }
+    }, [hightlight]);
+
+    React.useEffect(() => {
+        if (state.projectUpdated?.status === true) {
+            setRows([state.projectUpdated?.data, ...rows]);
+            handleRequestSort('', orderBy);
+            dispatchState(clearUpdate(''));
+        }
+    }, [rows]);
+
+    const showEditMode = (e, row) => {
+        e.preventDefault();
         e.stopPropagation();
-        setEditMode(true);
-    };
-
-    const hideEditMode = () => {
-        setEditMode(false);
+        dispatchState(showEditProject(row));
     };
 
     const handleRequestSort = (event, property) => {
@@ -309,7 +462,7 @@ export default function ProjectTable() {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelected = rows.map((n) => n.stt);
+            const newSelected = rows.map((n) => n.id);
             setSelected(newSelected);
             return;
         }
@@ -372,19 +525,23 @@ export default function ProjectTable() {
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
-                                const isItemSelected = isSelected(row.stt);
+                                const isItemSelected = isSelected(row.id);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
                                 return (
                                     <TableRow
                                         hover
-                                        onClick={(event) => handleClick(event, row.stt)}
+                                        onClick={(event) => handleClick(event, row.id)}
                                         role="checkbox"
                                         aria-checked={isItemSelected}
                                         tabIndex={-1}
-                                        key={row.stt}
+                                        key={row.id}
                                         selected={isItemSelected}
-                                        sx={{ cursor: 'pointer' }}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            transition: 'background-color 3s ease',
+                                            backgroundColor: row.id === hightlight ? '#1976d2' : 'white',
+                                        }}
                                     >
                                         <TableCell padding="checkbox">
                                             <Checkbox
@@ -396,11 +553,11 @@ export default function ProjectTable() {
                                             />
                                         </TableCell>
                                         <TableCell align="left" component="th" id={labelId} scope="row" padding="none">
-                                            {row.stt}
+                                            {row.id}
                                         </TableCell>
-                                        <TableCell align="left">{row.date}</TableCell>
-                                        <TableCell align="left">{row.ten}</TableCell>
-                                        <TableCell align="left">{row.maHopDong}</TableCell>
+                                        <TableCell align="left">{row.startDate}</TableCell>
+                                        <TableCell align="left">{row.projectName}</TableCell>
+                                        <TableCell align="left">{row.contractCode}</TableCell>
                                         <TableCell
                                             align="left"
                                             style={{
@@ -412,22 +569,19 @@ export default function ProjectTable() {
                                             <Avatar
                                                 style={{ marginRight: '10px' }}
                                                 alt="Remy Sharp"
-                                                src="/image/avt.jpg"
+                                                src={row.mentor.avatar}
                                             />
 
-                                            {row.mentor}
+                                            {row.mentor.name}
                                         </TableCell>
-                                        <TableCell align="left">{row.role}</TableCell>
-                                        <TableCell align="left">{row.status}</TableCell>
+                                        <TableCell align="left">{row.members?.length}</TableCell>
+
+                                        <TableCell align="left">{row.statusProject}</TableCell>
+
+                                        <TableCell align="left">{row.salaryStatus}</TableCell>
                                         <TableCell align="left">
-                                            <LinearProgress variant="determinate" value={row.progress} />
-                                        </TableCell>
-                                        <TableCell align="left">
-                                            <Button onClick={showEditMode}>
+                                            <Button onClick={(e) => showEditMode(e, row)}>
                                                 <EditIcon color="action"></EditIcon>
-                                            </Button>
-                                            <Button>
-                                                <MoreVertIcon color="action"></MoreVertIcon>
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -455,7 +609,7 @@ export default function ProjectTable() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            {editMode === true ? (
+            {state.editProject?.status === true ? (
                 <div
                     style={{
                         display: 'flex',
@@ -483,11 +637,46 @@ export default function ProjectTable() {
                             '&::-webkit-scrollbar': {
                                 display: 'none',
                             },
-                            '-ms-overflow-style': 'none',
-                            'scrollbar-width': 'none',
+                            msOverflowStyle: 'none',
+                            scrollbarWidth: 'none',
                         }}
                     >
                         <EditProjectForm />
+                    </Card>
+                </div>
+            ) : state.addProject?.status === true ? (
+                <div
+                    style={{
+                        display: 'flex',
+                        height: '100vh',
+                        width: '100vw',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        top: 0,
+                        bottom: 0,
+                        position: 'absolute',
+                        zIndex: 2,
+                        left: 0,
+                        right: 0,
+                    }}
+                >
+                    <Card
+                        sx={{
+                            height: '90%',
+                            width: '90%',
+                            margin: 'auto',
+                            boxSizing: 'border-box',
+                            padding: '20px',
+                            overflowY: 'auto',
+                            borderRadius: '10px',
+                            '&::-webkit-scrollbar': {
+                                display: 'none',
+                            },
+                            msOverflowStyle: 'none',
+                            scrollbarWidth: 'none',
+                        }}
+                    >
+                        <AddNewProject />
                     </Card>
                 </div>
             ) : (

@@ -22,7 +22,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { CheckBox, Edit } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
-import { hideEditProject, updateProject } from '../context/action.context';
+import { hideAddProject, hideEditProject, updateProject } from '../context/action.context';
 import { format } from 'date-fns';
 
 const totalMembers = [
@@ -49,36 +49,26 @@ const totalMembers = [
     { id: 21, name: 'Minh Trung', avatar: '/image/avt.jpg' },
 ];
 
-const EditProjectForm = () => {
+const AddNewProject = () => {
     const [state, dispatchState] = useContext(StateContext);
-    const [projectName, setProjectName] = useState(state.editProject.data.projectName);
-    const [contractCode, setContractCode] = useState(state.editProject.data.contractCode);
-    const [members, setMembers] = useState(state.editProject.data.members);
-    const [statusProject, setStatusProject] = useState(state.editProject.data.statusProject);
-    const [salaryStatus, setSalaryStatus] = useState(state.editProject.data.salaryStatus);
+    const [projectName, setProjectName] = useState('');
+    const [contractCode, setContractCode] = useState('');
+    const [members, setMembers] = useState([]);
+    const [statusProject, setStatusProject] = useState('');
+    const [salaryStatus, setSalaryStatus] = useState('');
     const [editProjectMember, setEditProjectMember] = useState(false);
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [dayStart, setDayStart] = useState('');
     const [monthStart, setMonthStart] = useState('');
     const [yearStart, setYearStart] = useState('');
-    const [mentor, setMentor] = useState(state.editProject.data.mentor);
+    const [mentor, setMentor] = useState();
     const [editMentor, setEditMentor] = useState(false);
-    const [selectedMentor, setSelectedMentor] = useState(state.editProject.data.mentor);
+    const [selectedMentor, setSelectedMentor] = useState({});
     // Context
     // Funtion
-    useEffect(() => {
-        const temp = [];
-        const regex = /(\d{4})-(\d{2})-(\d{2})/;
-        state.editProject.data.members?.map((item) => temp.push(item.id));
-        setSelectedMembers(temp);
-        const match = state.editProject.data.startDate?.match(regex);
-        setDayStart(match[3]);
-        setMonthStart(match[2]);
-        setYearStart(match[1]);
-    }, []);
 
     const handleToggleMentor = (memberData) => {
-        setSelectedMentor(memberData);
+        setMentor(memberData);
     };
     const handleToggle = (memberId) => {
         const currentIndex = selectedMembers.indexOf(memberId);
@@ -110,7 +100,7 @@ const EditProjectForm = () => {
             mentor: mentor,
         };
         dispatchState(updateProject(projectData));
-        dispatchState(hideEditProject(''));
+        dispatchState(hideAddProject(''));
     };
 
     const handleShowEditProjectMember = (e) => {
@@ -128,7 +118,7 @@ const EditProjectForm = () => {
     };
 
     const handleHideEditProject = () => {
-        dispatchState(hideEditProject(''));
+        dispatchState(hideAddProject(''));
     };
 
     const handleSaveMember = (e) => {
@@ -141,8 +131,6 @@ const EditProjectForm = () => {
         });
         setMembers(temp);
     };
-
-    const memberOptions = ['Alice', 'Bob', 'Charlie', 'David'];
 
     return (
         <form onSubmit={handleSubmit}>
@@ -332,7 +320,7 @@ const EditProjectForm = () => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <AvatarGroup max={4} sx={{ marginRight: '5px' }}>
-                            <Avatar src={mentor.avatar} alt={mentor.name} />
+                            {mentor ? <Avatar src={mentor.avatar} alt={mentor.name} /> : ''}
                         </AvatarGroup>
 
                         <Fab
@@ -397,7 +385,7 @@ const EditProjectForm = () => {
                                             <ListItemText id={labelId} primary={member.name} />
                                             <Checkbox
                                                 edge="end"
-                                                checked={selectedMentor.id === member.id}
+                                                checked={mentor?.id === member.id}
                                                 tabIndex={-1}
                                                 disableRipple
                                                 inputProps={{ 'aria-labelledby': labelId }}
@@ -447,4 +435,4 @@ const EditProjectForm = () => {
     );
 };
 
-export default EditProjectForm;
+export default AddNewProject;

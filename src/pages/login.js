@@ -27,7 +27,7 @@ export default function SignInSide() {
         } else if (data.get('email') === 'member') {
             dispatchState(getDataUser({ role: 'member' }));
         }
-        dispatchState(logged);
+        dispatchState(logged(''));
     };
 
     return (
