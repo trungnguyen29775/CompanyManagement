@@ -12,7 +12,8 @@ import ProjectCard from '../../components/projectCard';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import ProjectDetail from '../../components/projectDetail';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Button, TextField } from '@mui/material';
+import ProjectTable from '../../components/projectTable';
 
 const members = [
     {
@@ -250,6 +251,7 @@ function Home() {
     const [projecType, setProjectType] = useState('Dự Án Giáo Dục');
     const [visibleData, setVisibleData] = useState(projects);
     const [page, setPage] = useState(1);
+    const [table, setTable] = useState(false);
     useEffect(() => {
         setProjects(projecType === 'Dự Án Giáo Dục' ? eduProject : businessProject);
     }, [projecType]);
@@ -270,47 +272,73 @@ function Home() {
     return (
         <div className="content-container">
             <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <FormControl sx={{ marginRight: '40px' }}>
-                        <InputLabel id="project-type-label">Loại Dự Án</InputLabel>
-                        <Select
-                            labelId="project-type-label"
-                            id="project-type-label-select"
-                            value={projecType}
-                            label="Loại Dự Án"
-                            onChange={handleChangeProjectNav}
-                        >
-                            <MenuItem value={'Dự Án Giáo Dục'}>Dự Án Giáo Dục</MenuItem>
-                            <MenuItem value={'Dự Án Doanh Nghiệp'}>Dự Án Doanh Nghiệp</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <Autocomplete
-                        disablePortal
-                        id="combo-box-demo"
-                        options={members}
-                        sx={{ width: 300, height: '100%' }}
-                        renderInput={(params) => <TextField {...params} label="Tìm kiếm theo tên dự án" />}
-                    />
+                <Box
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0px 20px',
+                    }}
+                >
+                    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                        <FormControl sx={{ marginRight: '40px' }}>
+                            <InputLabel id="project-type-label">Loại Dự Án</InputLabel>
+                            <Select
+                                labelId="project-type-label"
+                                id="project-type-label-select"
+                                value={projecType}
+                                label="Loại Dự Án"
+                                onChange={handleChangeProjectNav}
+                            >
+                                <MenuItem value={'Dự Án Giáo Dục'}>Dự Án Giáo Dục</MenuItem>
+                                <MenuItem value={'Dự Án Doanh Nghiệp'}>Dự Án Doanh Nghiệp</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Autocomplete
+                            disablePortal
+                            id="combo-box-demo"
+                            options={members}
+                            sx={{ width: 300, height: '100%' }}
+                            renderInput={(params) => <TextField {...params} label="Tìm kiếm theo tên dự án" />}
+                        />
+                    </Box>
+                    <Button
+                        onClick={() => setTable(true)}
+                        sx={{ marginRight: '40px' }}
+                        variant="contained"
+                        color="secondary"
+                    >
+                        {table === true ? 'Hiển thị chi tiết' : 'Hiển thị dạng bảng'}
+                    </Button>
                 </Box>
-                <div className="content-main">
-                    {visibleData?.map((item, index) => {
-                        return <ProjectCard data={item} key={index} />;
-                    })}
-                </div>
-                <Stack spacing={2} style={{ marginBottom: '30px' }}>
-                    <Pagination
-                        defaultPage={1}
-                        count={
-                            projects?.length % visibleNum === 0
-                                ? Math.floor(projects.length / visibleNum)
-                                : projects.length < visibleNum
-                                ? 1
-                                : Math.floor(projects.length / visibleNum) + 1
-                        }
-                        onChange={handlePaginitionProject}
-                        page={page}
-                    />
-                </Stack>
+
+                {table === true ? (
+                    <ProjectTable />
+                ) : (
+                    <>
+                        <div className="content-main">
+                            {visibleData?.map((item, index) => {
+                                return <ProjectCard data={item} key={index} />;
+                            })}
+                        </div>
+                        <Stack spacing={2} style={{ marginBottom: '30px' }}>
+                            <Pagination
+                                defaultPage={1}
+                                count={
+                                    projects?.length % visibleNum === 0
+                                        ? Math.floor(projects.length / visibleNum)
+                                        : projects.length < visibleNum
+                                        ? 1
+                                        : Math.floor(projects.length / visibleNum) + 1
+                                }
+                                onChange={handlePaginitionProject}
+                                page={page}
+                            />
+                        </Stack>
+                    </>
+                )}
             </div>
         </div>
     );

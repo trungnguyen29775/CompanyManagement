@@ -96,7 +96,7 @@ const AddNewProject = () => {
             members: temp,
             statusProject: statusProject,
             salaryStatus: salaryStatus,
-            id: state.editProject.data.id,
+            id: Math.round(Math.random(0, 1) * 80 - 30),
             mentor: mentor,
         };
         dispatchState(updateProject(projectData));
