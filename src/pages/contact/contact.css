@@ -1,0 +1,14 @@
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 70px;
+    flex-wrap: wrap;
+    padding: 10px;
+    align-items: center;
+}
+.contact-card-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+}
