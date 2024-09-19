@@ -26,7 +26,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Autocomplete, Button, Card, Input, TextField } from '@mui/material';
 import { InputOutlined } from '@mui/icons-material';
-import EditProjectForm from './editForm';
+import EditProjectForm from './editProjectForm';
 import StateContext from '../context/context.context';
 import { clearUpdate, showEditProject } from '../context/action.context';
 import AddNewProject from './addProject';

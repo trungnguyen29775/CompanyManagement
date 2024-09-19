@@ -25,8 +25,11 @@ import Avatar from '@mui/material/Avatar';
 
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Card, TextField } from '@mui/material';
 import Form from './form';
+import StateContext from '../context/context.context';
+import EditMemberForm from './editMemberForm';
+import AddNewMember from './addMember';
 const members = [
     {
         label: 'Nguyễn Trần Minh Trung',
@@ -281,7 +284,7 @@ export default function MemberTable() {
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [editState, setEditState] = React.useState(false);
-
+    const [state, dispatchState] = React.useContext(StateContext);
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -429,7 +432,79 @@ export default function MemberTable() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            {/* <Form /> */}
+            {state.ediMember === true ? (
+                <div
+                    style={{
+                        display: 'flex',
+                        height: '100vh',
+                        width: '100vw',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        top: 0,
+                        bottom: 0,
+                        position: 'absolute',
+                        zIndex: 2,
+                        left: 0,
+                        right: 0,
+                    }}
+                >
+                    <Card
+                        sx={{
+                            height: '90%',
+                            width: '90%',
+                            margin: 'auto',
+                            boxSizing: 'border-box',
+                            padding: '20px',
+                            overflowY: 'auto',
+                            borderRadius: '10px',
+                            '&::-webkit-scrollbar': {
+                                display: 'none',
+                            },
+                            msOverflowStyle: 'none',
+                            scrollbarWidth: 'none',
+                        }}
+                    >
+                        <EditMemberForm />
+                    </Card>
+                </div>
+            ) : state.addMember === true ? (
+                <div
+                    style={{
+                        display: 'flex',
+                        height: '100vh',
+                        width: '100vw',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        top: 0,
+                        bottom: 0,
+                        position: 'absolute',
+                        zIndex: 2,
+                        left: 0,
+                        right: 0,
+                    }}
+                >
+                    <Card
+                        sx={{
+                            height: '90%',
+                            width: '90%',
+                            margin: 'auto',
+                            boxSizing: 'border-box',
+                            padding: '20px',
+                            overflowY: 'auto',
+                            borderRadius: '10px',
+                            '&::-webkit-scrollbar': {
+                                display: 'none',
+                            },
+                            msOverflowStyle: 'none',
+                            scrollbarWidth: 'none',
+                        }}
+                    >
+                        <AddNewMember />
+                    </Card>
+                </div>
+            ) : (
+                ''
+            )}
         </Box>
     );
 }

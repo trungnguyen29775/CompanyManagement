@@ -3,10 +3,12 @@ import {
     DELETE_PROJECT,
     GET_DATA_USER,
     GET_PROJECT_DATA,
+    HIDE_ADD_MEMBER,
     HIDE_ADD_PROJECT,
     HIDE_EDIT_PROJECT,
     LOGGED,
     LOGGOUT,
+    SHOW_ADD_MEMBER,
     SHOW_ADD_PROJECT,
     SHOW_EDIT_PROJECT,
     UPDATATE_PROJECT,
@@ -102,6 +104,20 @@ export const reducer = (state, action) => {
             return {
                 ...state,
                 addProject: false,
+            };
+        }
+
+        case SHOW_ADD_MEMBER: {
+            return {
+                ...state,
+                addMember: true,
+            };
+        }
+
+        case HIDE_ADD_MEMBER: {
+            return {
+                ...state,
+                addMember: false,
             };
         }
         default: {

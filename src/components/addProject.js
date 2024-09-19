@@ -24,6 +24,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
 import { hideAddProject, hideEditProject, updateProject } from '../context/action.context';
 import { format } from 'date-fns';
+import instance from '../axios/instance';
+import { CREATE_NEW_PROJECT } from '../constant/endPoint';
 
 const totalMembers = [
     { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },
@@ -99,8 +101,17 @@ const AddNewProject = () => {
             id: Math.round(Math.random(0, 1) * 80 - 30),
             mentor: mentor,
         };
-        dispatchState(updateProject(projectData));
-        dispatchState(hideAddProject(''));
+
+        instance
+            .post(CREATE_NEW_PROJECT, projectData)
+            .then((res) => {
+                console.log(res.data);
+                dispatchState(updateProject(projectData));
+                dispatchState(hideAddProject(''));
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     };
 
     const handleShowEditProjectMember = (e) => {
@@ -135,7 +146,7 @@ const AddNewProject = () => {
     return (
         <form onSubmit={handleSubmit}>
             <Typography variant="h6" gutterBottom>
-                Chỉnh sửa thông tin dự án
+                Thêm dự án mới
             </Typography>
 
             <Grid container spacing={2}>

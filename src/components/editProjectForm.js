@@ -16,14 +16,9 @@ import {
     Checkbox,
     Drawer,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CheckBox, Edit } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
 import { hideEditProject, updateProject } from '../context/action.context';
-import { format } from 'date-fns';
 
 const totalMembers = [
     { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },

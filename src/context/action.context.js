@@ -7,6 +7,7 @@ import {
     HIDE_EDIT_PROJECT,
     LOGGED,
     LOGGOUT,
+    SHOW_ADD_MEMBER,
     SHOW_ADD_PROJECT,
     SHOW_EDIT_PROJECT,
     UPDATATE_PROJECT,
@@ -85,6 +86,13 @@ export const showAddProject = (payload) => {
 export const hideAddProject = (payload) => {
     return {
         type: HIDE_ADD_PROJECT,
+        payload,
+    };
+};
+
+export const showAddMember = (payload) => {
+    return {
+        type: SHOW_ADD_MEMBER,
         payload,
     };
 };
