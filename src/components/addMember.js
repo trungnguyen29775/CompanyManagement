@@ -1,35 +1,20 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {
     TextField,
     Button,
     Grid,
     Typography,
-    Autocomplete,
-    Avatar,
     Box,
-    AvatarGroup,
-    List,
-    Fab,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
-    Checkbox,
-    Drawer,
     Select,
     MenuItem,
     InputLabel,
     FormControl,
+    Snackbar,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CheckBox, Edit } from '@mui/icons-material';
-import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
-import { hideAddProject, hideEditProject, updateProject } from '../context/action.context';
-import { format } from 'date-fns';
+import { hideAddMember, showNotify } from '../context/action.context';
 import instance from '../axios/instance';
-import { CREATE_NEW_MEMBER, CREATE_NEW_PROJECT } from '../constant/endPoint';
+import { CREATE_NEW_MEMBER } from '../constant/endPoint';
 
 const AddNewMember = () => {
     const [state, dispatchState] = useContext(StateContext);
@@ -40,6 +25,7 @@ const AddNewMember = () => {
     const [month, setMonth] = useState('');
     const [year, setYear] = useState('');
     const [role, setRole] = useState('member');
+    const [addStatus, setAddStatus] = useState(true);
     // Context
     // Funtion
 
@@ -54,21 +40,21 @@ const AddNewMember = () => {
             avtFilePath: null,
             username,
         };
-        // console.log(memberData);
+        console.log(memberData);
 
         instance
             .post(CREATE_NEW_MEMBER, memberData)
-            .then((res) => console.log('Save: ', res.data))
+            .then((res) => {
+                dispatchState(hideAddMember(''));
+
+                dispatchState(
+                    showNotify({
+                        message: 'Thêm thành viên thành công',
+                        action: 'undo',
+                    }),
+                );
+            })
             .catch((err) => console.log(err));
-        // .post(CREATE_NEW_PROJECT, projectData)
-        // .then((res) => {
-        //     console.log(res.data);
-        //     dispatchState(updateProject(projectData));
-        //     dispatchState(hideAddProject(''));
-        // })
-        // .catch((err) => {
-        //     console.log(err);
-        // });
     };
 
     return (
@@ -174,7 +160,13 @@ const AddNewMember = () => {
                     <Button type="submit" variant="contained" color="primary" sx={{}}>
                         Thêm thành viên
                     </Button>
-                    <Button sx={{ marginLeft: '20px' }} type="button" variant="contained" color="primary">
+                    <Button
+                        onClick={() => dispatchState(hideAddMember(''))}
+                        sx={{ marginLeft: '20px' }}
+                        type="button"
+                        variant="contained"
+                        color="primary"
+                    >
                         Thoát
                     </Button>
                 </Grid>

@@ -14,6 +14,8 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import StateContext from '../context/context.context';
 import { getDataUser, logged } from '../context/action.context';
+import instance from '../axios/instance';
+import { LOGGIN } from '../constant/endPoint';
 
 const defaultTheme = createTheme();
 
@@ -22,12 +24,15 @@ export default function SignInSide() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        if (data.get('email') === 'admin') {
-            dispatchState(getDataUser({ role: 'admin' }));
-        } else if (data.get('email') === 'member') {
-            dispatchState(getDataUser({ role: 'member' }));
-        }
-        dispatchState(logged(''));
+        instance
+            .post(LOGGIN, { username: data.get('username'), password: data.get('password') })
+            .then((res) => {
+                dispatchState(getDataUser(res.data.userData));
+                dispatchState(logged(''));
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     };
 
     return (
@@ -68,10 +73,10 @@ export default function SignInSide() {
                                 margin="normal"
                                 required
                                 fullWidth
-                                id="email"
-                                label="Địa chỉ Email"
-                                name="email"
-                                autoComplete="email"
+                                id="username"
+                                label="Địa chỉ username"
+                                name="username"
+                                autoComplete="username"
                                 autoFocus
                             />
                             <TextField

@@ -22,7 +22,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { CheckBox, Edit } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
-import { hideAddProject, hideEditProject, updateProject } from '../context/action.context';
+import { hideAddProject, hideEditProject, showNotify, updateProject } from '../context/action.context';
 import { format } from 'date-fns';
 import instance from '../axios/instance';
 import { CREATE_NEW_PROJECT } from '../constant/endPoint';
@@ -108,6 +108,7 @@ const AddNewProject = () => {
                 console.log(res.data);
                 dispatchState(updateProject(projectData));
                 dispatchState(hideAddProject(''));
+                dispatchState(showNotify({ message: 'Thêm dự án mới thành công' }));
             })
             .catch((err) => {
                 console.log(err);

@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import StateContext from '../context/context.context';
-import { hideEditProject, updateProject } from '../context/action.context';
+import { hideEditProject, showNotify, updateProject } from '../context/action.context';
 
 const totalMembers = [
     { id: 1, name: 'Alice', avatar: '/image/avt.jpg' },
@@ -106,6 +106,7 @@ const EditProjectForm = () => {
         };
         dispatchState(updateProject(projectData));
         dispatchState(hideEditProject(''));
+        dispatchState(showNotify({ message: 'Cập nhật dự án ' + projectName + ' thành công' }));
     };
 
     const handleShowEditProjectMember = (e) => {

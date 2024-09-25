@@ -16,20 +16,18 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import Avatar from '@mui/material/Avatar';
-
 import EditIcon from '@mui/icons-material/Edit';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Autocomplete, Card, TextField } from '@mui/material';
-import Form from './form';
 import StateContext from '../context/context.context';
 import EditMemberForm from './editMemberForm';
 import AddNewMember from './addMember';
+import instance from '../axios/instance';
+import { GET_ADMIN_MEMBER } from '../constant/endPoint';
+import { showEditMember } from '../context/action.context';
+
 const members = [
     {
         label: 'Nguyễn Trần Minh Trung',
@@ -60,15 +58,6 @@ function createData(stt, name, username, role, avtFilePath, valueProposition, do
     };
 }
 
-const rows = [
-    createData(1, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '600000'),
-    createData(2, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '0'),
-    createData(3, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '600000'),
-    createData(4, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '600000'),
-    createData(5, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '600000'),
-    createData(6, 'Nguyễn Trần Minh Trung', 'trung123', 'member', '/image/avt.jpg', '2000000', '28/08/2003', '600000'),
-];
-
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
@@ -86,15 +75,15 @@ function getComparator(order, orderBy) {
 }
 
 function stableSort(array, comparator) {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
+    const stabilizedThis = array?.map((el, index) => [el, index]);
+    stabilizedThis?.sort((a, b) => {
         const order = comparator(a[0], b[0]);
         if (order !== 0) {
             return order;
         }
         return a[1] - b[1];
     });
-    return stabilizedThis.map((el) => el[0]);
+    return stabilizedThis?.map((el) => el[0]);
 }
 
 const headCells = [
@@ -133,12 +122,6 @@ const headCells = [
         numeric: false,
         disablePadding: false,
         label: 'Ngày sinh',
-    },
-    {
-        id: 'totalDebt',
-        numeric: true,
-        disablePadding: false,
-        label: 'Tổng tiền nợ',
     },
     {
         id: 'action',
@@ -285,6 +268,33 @@ export default function MemberTable() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [editState, setEditState] = React.useState(false);
     const [state, dispatchState] = React.useContext(StateContext);
+    const [memberData, setMemberData] = React.useState([]);
+    const [visibleRows, setVisibleRows] = React.useState([]);
+    // Use Effect
+    React.useEffect(() => {
+        instance
+            .post(GET_ADMIN_MEMBER, state.userData)
+            .then((res) => {
+                setMemberData(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    React.useEffect(() => {
+        if (memberData.length != 0) {
+            setVisibleRows(
+                () =>
+                    stableSort(memberData, getComparator(order, orderBy))?.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage,
+                    ),
+                [order, orderBy, page, rowsPerPage],
+            );
+        }
+    }, [memberData]);
+
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -293,7 +303,7 @@ export default function MemberTable() {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelected = rows.map((n) => n.stt);
+            const newSelected = memberData?.map((n) => n.stt);
             setSelected(newSelected);
             return;
         }
@@ -332,13 +342,7 @@ export default function MemberTable() {
     const isSelected = (id) => selected.indexOf(id) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty rows.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-    const visibleRows = React.useMemo(
-        () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-        [order, orderBy, page, rowsPerPage],
-    );
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - memberData?.length) : 0;
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -352,10 +356,10 @@ export default function MemberTable() {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
+                            rowCount={memberData?.length}
                         />
                         <TableBody>
-                            {visibleRows.map((row, index) => {
+                            {visibleRows?.map((row, index) => {
                                 const isItemSelected = isSelected(row.stt);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -399,13 +403,23 @@ export default function MemberTable() {
                                             {row.name}
                                         </TableCell>
                                         <TableCell align="left">{row.username}</TableCell>
-                                        <TableCell align="left">{row.role}</TableCell>
+                                        <TableCell align="left">
+                                            {row.role === 'member'
+                                                ? 'Chuyên viên'
+                                                : row.role === 'leader'
+                                                ? 'Lãnh đạo'
+                                                : 'Lỗi'}
+                                        </TableCell>
                                         <TableCell align="left">{row.valueProposition}</TableCell>
                                         <TableCell align="left">{row.dob}</TableCell>
-                                        <TableCell align="left">{row.totalDebt}</TableCell>
                                         <TableCell align="left">
-                                            <EditIcon color="action"></EditIcon>
-                                            <MoreVertIcon color="action"></MoreVertIcon>
+                                            <EditIcon
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    dispatchState(showEditMember(row));
+                                                }}
+                                                color="action"
+                                            ></EditIcon>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -425,14 +439,14 @@ export default function MemberTable() {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={rows.length}
+                    count={memberData?.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            {state.ediMember === true ? (
+            {state.editMember?.show === true ? (
                 <div
                     style={{
                         display: 'flex',

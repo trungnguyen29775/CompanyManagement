@@ -21,7 +21,10 @@ import { color } from '../constant/style';
 import AdminMember from '../pages/adminMember';
 import StateContext from '../context/context.context';
 import { useNavigate } from 'react-router-dom';
-import { loggout } from '../context/action.context';
+import { getAdminMember, getAdminProject, hideNotify, loggout } from '../context/action.context';
+import { Snackbar } from '@mui/material';
+import instance from '../axios/instance';
+import { GET_ADMIN_MEMBER, GET_ADMIN_PROJECT } from '../constant/endPoint';
 const AdminLayout = () => {
     const [adminNav, setAdminNav] = useState('Project');
     const navigation = useNavigate();
@@ -32,6 +35,30 @@ const AdminLayout = () => {
     const handleLoggout = () => {
         dispatchState(loggout('a'));
     };
+    useEffect(() => {
+        if (adminNav === 'Member' && state.adminMemberData === null) {
+            instance
+                .post(GET_ADMIN_MEMBER, state.userData)
+                .then((res) => {
+                    dispatchState(getAdminMember(res.data));
+                    console.log(res.data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } else if (adminNav === 'Project' && state.adminProjectData === null) {
+            instance
+                .post(GET_ADMIN_PROJECT, state.userData)
+                .then((res) => {
+                    dispatchState(getAdminProject(res.data));
+                    console.log(res.data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    });
+
     return (
         <Box
             sx={{
@@ -104,6 +131,19 @@ const AdminLayout = () => {
             >
                 {adminNav === 'Project' ? <AdminProject /> : adminNav === 'Member' ? <AdminMember /> : ''}
             </Box>
+            <Snackbar
+                open={state.notify?.show}
+                onClose={() => dispatchState(hideNotify(''))}
+                message={state.notify?.data?.message}
+                autoHideDuration={6000}
+                variant="success"
+                sx={{
+                    '& .MuiSnackbarContent-root': {
+                        backgroundColor: 'white',
+                        color: 'green',
+                    },
+                }}
+            />
         </Box>
     );
 };
