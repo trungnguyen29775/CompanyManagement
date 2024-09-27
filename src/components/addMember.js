@@ -12,11 +12,12 @@ import {
     Snackbar,
 } from '@mui/material';
 import StateContext from '../context/context.context';
-import { hideAddMember, showNotify } from '../context/action.context';
+import { hideAddMember, showNotify, updateMember } from '../context/action.context';
 import instance from '../axios/instance';
 import { CREATE_NEW_MEMBER } from '../constant/endPoint';
 
-const AddNewMember = () => {
+const AddNewMember = (props) => {
+    const currentMembers = props.currentMembers;
     const [state, dispatchState] = useContext(StateContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -45,6 +46,16 @@ const AddNewMember = () => {
         instance
             .post(CREATE_NEW_MEMBER, memberData)
             .then((res) => {
+                const formatData = {
+                    name,
+                    role,
+                    dob: `${year}-${month}-${day}`,
+                    accumulatedValue: 0,
+                    avtFilePath: null,
+                    username,
+                    stt: currentMembers.length + 2,
+                };
+                dispatchState(updateMember(formatData));
                 dispatchState(hideAddMember(''));
 
                 dispatchState(

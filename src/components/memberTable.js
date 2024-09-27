@@ -20,13 +20,23 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import Avatar from '@mui/material/Avatar';
 import EditIcon from '@mui/icons-material/Edit';
-import { Autocomplete, Card, TextField } from '@mui/material';
+import {
+    Autocomplete,
+    Button,
+    Card,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    TextField,
+} from '@mui/material';
 import StateContext from '../context/context.context';
 import EditMemberForm from './editMemberForm';
 import AddNewMember from './addMember';
 import instance from '../axios/instance';
 import { GET_ADMIN_MEMBER } from '../constant/endPoint';
-import { showEditMember } from '../context/action.context';
+import { clearUpdateMember, showEditMember } from '../context/action.context';
 
 const members = [
     {
@@ -187,7 +197,13 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-    const { numSelected } = props;
+    const { numSelected, memberSelected } = props;
+    const [delteMember, setDeleteMember] = React.useState(false);
+
+    const handleCloseConfirmDelete = () => {
+        console.log(memberSelected);
+        setDeleteMember(false);
+    };
 
     return (
         <Toolbar
@@ -199,6 +215,25 @@ function EnhancedTableToolbar(props) {
                 alignItems: 'flex-start',
             }}
         >
+            <Dialog
+                open={delteMember}
+                onClose={handleCloseConfirmDelete}
+                aria-labelledby="alert-delete-member-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-delete-member-title">Bạn có chắc muốn xóa thành viên này chứ?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Nếu bấm đồng ý sẽ xóa thành viên này vĩnh viễn và không thể phục hồi.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button>Đồng ý</Button>
+                    <Button autoFocus onClick={handleCloseConfirmDelete}>
+                        Từ chối
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Toolbar
                 sx={{
                     pl: { sm: 2 },
@@ -226,7 +261,13 @@ function EnhancedTableToolbar(props) {
                             <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1" component="div">
                                 {numSelected} selected
                             </Typography>
-                            <Tooltip title="Delete">
+                            <Tooltip
+                                title="Delete"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteMember(true);
+                                }}
+                            >
                                 <IconButton>
                                     <DeleteIcon />
                                 </IconButton>
@@ -261,15 +302,19 @@ EnhancedTableToolbar.propTypes = {
 
 export default function MemberTable() {
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('stt');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [rowsPerPage, setRowsPerPage] = React.useState(20);
     const [editState, setEditState] = React.useState(false);
     const [state, dispatchState] = React.useContext(StateContext);
     const [memberData, setMemberData] = React.useState([]);
     const [visibleRows, setVisibleRows] = React.useState([]);
+    const [highlight, setHighLight] = React.useState([]);
+    React.useEffect(() => {
+        console.log(selected);
+    }, [selected]);
     // Use Effect
     React.useEffect(() => {
         instance
@@ -295,6 +340,32 @@ export default function MemberTable() {
         }
     }, [memberData]);
 
+    React.useEffect(() => {
+        if (state.updateMember?.status === true) {
+            const targetIndex = memberData.findIndex((item) => item.username === state.updateMember.data.username);
+            if (targetIndex !== -1) {
+                let temp = [];
+                temp = memberData.slice(0, targetIndex).concat(memberData.slice(targetIndex + 1, memberData.length));
+                temp.unshift(state.updateMember.data);
+                setMemberData(temp);
+            } else if (targetIndex === -1) setMemberData((preState) => [state.updateMember.data, ...preState]);
+            setHighLight((preState) => [...preState, state.updateMember.data.stt]);
+            dispatchState(clearUpdateMember(''));
+        }
+    }, [state]);
+
+    React.useEffect(() => {
+        if (highlight.length !== 0) {
+            setTimeout(() => {
+                setHighLight((preState) => {
+                    let temp = preState;
+                    temp.shift();
+                    return temp;
+                });
+            }, 10000);
+        }
+    }, [highlight]);
+
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -303,19 +374,19 @@ export default function MemberTable() {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelected = memberData?.map((n) => n.stt);
+            const newSelected = memberData?.map((n) => n);
             setSelected(newSelected);
             return;
         }
         setSelected([]);
     };
 
-    const handleClick = (event, id) => {
-        const selectedIndex = selected.indexOf(id);
+    const handleClick = (event, data) => {
+        const selectedIndex = selected.indexOf(data);
         let newSelected = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
+            newSelected = newSelected.concat(selected, data);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -339,7 +410,7 @@ export default function MemberTable() {
         setDense(event.target.checked);
     };
 
-    const isSelected = (id) => selected.indexOf(id) !== -1;
+    const isSelected = (id) => selected?.findIndex((item) => item.id === id);
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - memberData?.length) : 0;
@@ -347,7 +418,7 @@ export default function MemberTable() {
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar numSelected={selected.length} />
+                <EnhancedTableToolbar numSelected={selected.length} memberSelected={selected} />
                 <TableContainer>
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={dense ? 'small' : 'medium'}>
                         <EnhancedTableHead
@@ -362,22 +433,26 @@ export default function MemberTable() {
                             {visibleRows?.map((row, index) => {
                                 const isItemSelected = isSelected(row.stt);
                                 const labelId = `enhanced-table-checkbox-${index}`;
-
+                                console.log(isItemSelected);
                                 return (
                                     <TableRow
                                         hover
-                                        onClick={(event) => handleClick(event, row.stt)}
+                                        onClick={(event) => handleClick(event, row)}
                                         role="checkbox"
-                                        aria-checked={isItemSelected}
+                                        aria-checked={isItemSelected === -1 ? false : true}
                                         tabIndex={-1}
                                         key={row.stt}
-                                        selected={isItemSelected}
-                                        sx={{ cursor: 'pointer' }}
+                                        selected={isItemSelected === -1 ? false : true}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            transition: 'background-color 3s ease',
+                                            backgroundColor: highlight?.indexOf(row.stt) !== -1 ? '#1976d2' : 'white',
+                                        }}
                                     >
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 color="primary"
-                                                checked={isItemSelected}
+                                                checked={isItemSelected === -1 ? false : true}
                                                 inputProps={{
                                                     'aria-labelledby': labelId,
                                                 }}
@@ -413,13 +488,15 @@ export default function MemberTable() {
                                         <TableCell align="left">{row.valueProposition}</TableCell>
                                         <TableCell align="left">{row.dob}</TableCell>
                                         <TableCell align="left">
-                                            <EditIcon
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    dispatchState(showEditMember(row));
-                                                }}
-                                                color="action"
-                                            ></EditIcon>
+                                            <Button>
+                                                <EditIcon
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        dispatchState(showEditMember(row));
+                                                    }}
+                                                    color="action"
+                                                ></EditIcon>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -437,7 +514,7 @@ export default function MemberTable() {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[20, 40, 100]}
                     component="div"
                     count={memberData?.length}
                     rowsPerPage={rowsPerPage}
@@ -513,7 +590,7 @@ export default function MemberTable() {
                             scrollbarWidth: 'none',
                         }}
                     >
-                        <AddNewMember />
+                        <AddNewMember currentMembers={memberData} />
                     </Card>
                 </div>
             ) : (

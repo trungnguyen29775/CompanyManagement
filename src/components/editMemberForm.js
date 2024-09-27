@@ -12,18 +12,18 @@ import {
     Snackbar,
 } from '@mui/material';
 import StateContext from '../context/context.context';
-import { hideAddMember, showNotify } from '../context/action.context';
+import { hideAddMember, hideEditMember, showNotify, updateMember } from '../context/action.context';
 import instance from '../axios/instance';
-import { CREATE_NEW_MEMBER } from '../constant/endPoint';
+import { CREATE_NEW_MEMBER, UPDATE_MEMBER } from '../constant/endPoint';
 
 const EditMemberForm = () => {
     const [state, dispatchState] = useContext(StateContext);
     const [username, setUsername] = useState(state.editMember.data.username);
     const [password, setPassword] = useState('');
     const [name, setName] = useState(state.editMember.data.name);
-    const [day, setDay] = useState();
-    const [month, setMonth] = useState('');
-    const [year, setYear] = useState('');
+    const [day, setDay] = useState(state.editMember.data.dob?.split('-')[2]);
+    const [month, setMonth] = useState(state.editMember.data.dob?.split('-')[1]);
+    const [year, setYear] = useState(state.editMember.data.dob?.split('-')[0]);
     const [role, setRole] = useState(state.editMember.data.role);
     const [addStatus, setAddStatus] = useState(true);
     // Context
@@ -33,28 +33,39 @@ const EditMemberForm = () => {
         e.preventDefault();
         const memberData = {
             name,
-            password,
+            password:
+                password?.length > 0
+                    ? password !== state.editMember.data.password
+                        ? password
+                        : state.editMember.data.password
+                    : state.editMember.data.password,
             role,
             dob: `${year}-${month}-${day}`,
-            accumulatedValue: 0,
             avtFilePath: null,
             username,
         };
         console.log(memberData);
-
-        instance
-            .post(CREATE_NEW_MEMBER, memberData)
-            .then((res) => {
-                dispatchState(hideAddMember(''));
-
-                dispatchState(
-                    showNotify({
-                        message: 'Thêm thành viên thành công',
-                        action: 'undo',
-                    }),
-                );
-            })
-            .catch((err) => console.log(err));
+        if (
+            memberData.name != state.editMember.data.name ||
+            memberData.password != state.editMember.data.password ||
+            memberData.role != state.editMember.data.role ||
+            memberData.dob != state.editMember.data.dob
+        ) {
+            instance
+                .post(UPDATE_MEMBER, memberData)
+                .then((res) => {
+                    console.log(res.data);
+                    dispatchState(updateMember({ ...memberData, stt: state.editMember.data.stt }));
+                    dispatchState(hideEditMember(''));
+                    dispatchState(
+                        showNotify({
+                            message: 'Thêm thành viên thành công',
+                            action: 'undo',
+                        }),
+                    );
+                })
+                .catch((err) => console.log(err));
+        }
     };
 
     return (
@@ -75,18 +86,18 @@ const EditMemberForm = () => {
                         label="Tên tài khoản"
                         fullWidth
                         value={username}
+                        disabled
                         onChange={(e) => setUsername(e.target.value)}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Typography span="h5" marginBottom={'10px'}>
-                        Mật khẩu
+                        Mật khẩu mới{' (không thay đổi thì để trống)'}
                     </Typography>
 
                     <TextField
-                        required
                         id="password"
-                        label="Mật khẩu"
+                        label="Mật khẩu mới"
                         type="password"
                         fullWidth
                         value={password}
@@ -158,10 +169,10 @@ const EditMemberForm = () => {
 
                 <Grid item xs={12} sm={6} sx={{ marginTop: '30px' }}>
                     <Button type="submit" variant="contained" color="primary" sx={{}}>
-                        Thêm thành viên
+                        Lưu thay đổi
                     </Button>
                     <Button
-                        onClick={() => dispatchState(hideAddMember(''))}
+                        onClick={() => dispatchState(hideEditMember(''))}
                         sx={{ marginLeft: '20px' }}
                         type="button"
                         variant="contained"
