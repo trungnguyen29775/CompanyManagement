@@ -359,6 +359,7 @@ export default function MemberTable() {
             setTimeout(() => {
                 setHighLight((preState) => {
                     let temp = preState;
+
                     temp.shift();
                     return temp;
                 });
